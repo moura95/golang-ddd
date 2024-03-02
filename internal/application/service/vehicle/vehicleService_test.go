@@ -68,18 +68,18 @@ func TestGetAllVehicles(t *testing.T) {
 func TestGetVehicleID(t *testing.T) {
 	service := NewVehicleServiceTest()
 
-	vehicle, err := service.repository.GetByID(uuid.MustParse("43ee3d4c-de06-4021-ab6f-ba8113418df9"))
+	ve, err := service.repository.GetByID(uuid.MustParse("43ee3d4c-de06-4021-ab6f-ba8113418df9"))
 	if err != nil {
 		t.Error("Failed to get")
 	}
 
 	assert.NoError(t, err)
-	assert.Equal(t, vehicle.Uuid, uuid.MustParse("43ee3d4c-de06-4021-ab6f-ba8113418df9"))
-	assert.Equal(t, vehicle.Brand, "Scania")
-	assert.Equal(t, vehicle.Model, "R500")
-	assert.Equal(t, vehicle.YearOfManufacture, uint(2020))
-	assert.Equal(t, vehicle.LicensePlate, "ABC123")
-	assert.Equal(t, vehicle.Color, "Blue")
+	assert.Equal(t, ve.Uuid, uuid.MustParse("43ee3d4c-de06-4021-ab6f-ba8113418df9"))
+	assert.Equal(t, ve.Brand, "Scania")
+	assert.Equal(t, ve.Model, "R500")
+	assert.Equal(t, ve.YearOfManufacture, uint(2020))
+	assert.Equal(t, ve.LicensePlate, "ABC123")
+	assert.Equal(t, ve.Color, "Blue")
 
 }
 
