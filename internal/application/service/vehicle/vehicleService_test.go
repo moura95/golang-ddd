@@ -1,4 +1,4 @@
-package vehicle
+package vehicleservice
 
 import (
 	"testing"
@@ -10,18 +10,18 @@ import (
 )
 
 type VehicleServiceTest struct {
-	repository memory.IVehicleRepositoryMemory
+	repository vehicle.IVehicleRepository
 }
 
-func NewVehicleServiceTest(repo memory.IVehicleRepositoryMemory) *VehicleServiceTest {
+func NewVehicleServiceTest() *VehicleServiceTest {
+	repo := memory.NewVehicleRepository()
 	return &VehicleServiceTest{
 		repository: repo,
 	}
 }
 
 func TestCreateVehicle(t *testing.T) {
-	mockRepo := memory.NewVehicleRepository()
-	service := NewVehicleServiceTest(mockRepo)
+	service := NewVehicleServiceTest()
 
 	ve := vehicle.Vehicle{
 		Uuid:              uuid.New(),
@@ -41,9 +41,8 @@ func TestCreateVehicle(t *testing.T) {
 }
 
 func TestGetAllVehicles(t *testing.T) {
-	mockRepo := memory.NewVehicleRepository()
 
-	service := NewVehicleServiceTest(mockRepo)
+	service := NewVehicleServiceTest()
 
 	vehicles, err := service.repository.GetAll()
 	if err != nil {
@@ -67,8 +66,7 @@ func TestGetAllVehicles(t *testing.T) {
 }
 
 func TestGetVehicleID(t *testing.T) {
-	mockRepo := memory.NewVehicleRepository()
-	service := NewVehicleServiceTest(mockRepo)
+	service := NewVehicleServiceTest()
 
 	vehicle, err := service.repository.GetByID(uuid.MustParse("43ee3d4c-de06-4021-ab6f-ba8113418df9"))
 	if err != nil {
@@ -86,13 +84,11 @@ func TestGetVehicleID(t *testing.T) {
 }
 
 func TestUpdateVehicle(t *testing.T) {
-	mockRepo := memory.NewVehicleRepository()
-	service := NewVehicleServiceTest(mockRepo)
+	service := NewVehicleServiceTest()
 
 	uid := uuid.MustParse("43ee3d4c-de06-4021-ab6f-ba8113418df9")
 
 	d := &vehicle.Vehicle{
-		Uuid:              uid,
 		Brand:             "Scania Update",
 		Model:             "R501",
 		YearOfManufacture: 2021,
@@ -100,7 +96,7 @@ func TestUpdateVehicle(t *testing.T) {
 		Color:             "RED",
 	}
 
-	err := service.repository.Update(d)
+	err := service.repository.Update(uid, d)
 	if err != nil {
 		t.Error("Failed to update")
 	}
@@ -108,8 +104,7 @@ func TestUpdateVehicle(t *testing.T) {
 }
 
 func TestVehicleHardDelete(t *testing.T) {
-	mockRepo := memory.NewVehicleRepository()
-	service := NewVehicleServiceTest(mockRepo)
+	service := NewVehicleServiceTest()
 
 	uid := uuid.MustParse("43ee3d4c-de06-4021-ab6f-ba8113418df9")
 	err := service.repository.HardDelete(uid)
@@ -120,8 +115,7 @@ func TestVehicleHardDelete(t *testing.T) {
 }
 
 func TestVehicleSoftDelete(t *testing.T) {
-	mockRepo := memory.NewVehicleRepository()
-	service := NewVehicleServiceTest(mockRepo)
+	service := NewVehicleServiceTest()
 
 	uid := uuid.MustParse("43ee3d4c-de06-4021-ab6f-ba8113418df9")
 	err := service.repository.SoftDelete(uid)

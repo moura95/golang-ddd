@@ -19,17 +19,19 @@ type driverRepository struct {
 }
 
 type DtoDriverVehicle struct {
-	DriverUUID    uuid.UUID      `database:"driver_uuid"`
-	DriverName    string         `database:"name"`
-	DriverEmail   string         `database:"email"`
-	DriverTaxID   string         `database:"tax_id"`
-	DriverLicense string         `database:"driver_license"`
-	DriverDOB     sql.NullString `database:"date_of_birth"`
-	VehicleUUID   uuid.UUID      `database:"uuid"`
-	VehicleBrand  string         `database:"brand"`
-	VehicleModel  string         `database:"model"`
-	VehicleYear   uint           `database:"year_of_manufacture"`
-	VehicleColor  string         `database:"color"`
+	DriverUUID    uuid.UUID      `db:"driver_uuid"`
+	DriverName    string         `db:"name"`
+	DriverEmail   string         `db:"email"`
+	DriverTaxID   string         `db:"tax_id"`
+	DriverLicense string         `db:"driver_license"`
+	DriverDOB     sql.NullString `db:"date_of_birth"`
+	VehicleUUID   uuid.UUID      `db:"uuid"`
+	VehicleBrand  string         `db:"brand"`
+	VehicleModel  string         `db:"model"`
+	VehicleYear   uint           `db:"year_of_manufacture"`
+	VehicleColor  string         `db:"color"`
+	CreatedAt     time.Time      `db:"created_at"`
+	UpdatedAt     time.Time      `db:"update_at"`
 }
 
 type DtoDriverPostgres struct {
@@ -57,6 +59,7 @@ func (r *driverRepository) GetAll() ([]driver.Driver, error) {
 	}
 	for _, d := range dto {
 		instanceDriver := driver.NewDriver(d.Name, d.Email, d.TaxID, d.DriverLicense, d.DateOfBirth.String)
+		instanceDriver.Uuid = d.Uuid
 		drivers = append(drivers, *instanceDriver)
 	}
 	return drivers, nil
@@ -116,7 +119,7 @@ func (r *driverRepository) GetByID(uid uuid.UUID) (*aggregate.DriverVehicleAggre
 	var dto []DtoDriverVehicle
 
 	query := `
-		SELECT d.uuid, d.name, d.email, d.tax_id, d.driver_license, d.date_of_birth,
+		SELECT d.uuid driver_uuid, d.name, d.email, d.tax_id, d.driver_license, d.date_of_birth,
 		       v.uuid, v.brand , v.model,
 		       v.year_of_manufacture , v.color
 		FROM drivers AS d
@@ -127,10 +130,13 @@ func (r *driverRepository) GetByID(uid uuid.UUID) (*aggregate.DriverVehicleAggre
 
 	err := r.db.Select(&dto, query, uid)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
+		if errors.Is(err, sql.ErrNoRows) || err.Error() == "missing destination name uuid in *[]postgres.DtoDriverVehicle" {
 			return nil, nil
 		}
 		return nil, err
+	}
+	if dto == nil {
+		return nil, nil
 	}
 
 	d := &aggregate.DriverVehicleAggregate{

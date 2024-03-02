@@ -1,4 +1,4 @@
-package driver
+package driverservice
 
 import (
 	"fmt"
@@ -10,21 +10,21 @@ import (
 	"go.uber.org/zap"
 )
 
-type driverService struct {
+type Service struct {
 	repository driver.IDriverRepository
 	config     cfg.Config
 	logger     *zap.SugaredLogger
 }
 
-func NewDriverService(repo driver.IDriverRepository, cfg cfg.Config, log *zap.SugaredLogger) *driverService {
-	return &driverService{
+func NewDriverService(repo driver.IDriverRepository, cfg cfg.Config, log *zap.SugaredLogger) *Service {
+	return &Service{
 		repository: repo,
 		config:     cfg,
 		logger:     log,
 	}
 }
 
-func (d *driverService) Create(name, email, taxId, driverLicense, dateOfBirth string) error {
+func (d *Service) Create(name, email, taxId, driverLicense, dateOfBirth string) error {
 	dr := driver.NewDriver(name, email, taxId, driverLicense, dateOfBirth)
 	err := dr.Validate()
 	if err != nil {
@@ -37,7 +37,7 @@ func (d *driverService) Create(name, email, taxId, driverLicense, dateOfBirth st
 	}
 	return nil
 }
-func (d *driverService) Subscribe(driverUUID, vehicleUUID uuid.UUID) error {
+func (d *Service) Subscribe(driverUUID, vehicleUUID uuid.UUID) error {
 	driverVehicle := aggregate.DriverVehicle{
 		DriverUUID:  driverUUID,
 		VehicleUUID: vehicleUUID,
@@ -48,7 +48,7 @@ func (d *driverService) Subscribe(driverUUID, vehicleUUID uuid.UUID) error {
 	}
 	return nil
 }
-func (d *driverService) UnSubscribe(driverUUID, vehicleUUID uuid.UUID) error {
+func (d *Service) UnSubscribe(driverUUID, vehicleUUID uuid.UUID) error {
 	driverVehicle := aggregate.DriverVehicle{
 		DriverUUID:  driverUUID,
 		VehicleUUID: vehicleUUID,
@@ -60,16 +60,21 @@ func (d *driverService) UnSubscribe(driverUUID, vehicleUUID uuid.UUID) error {
 	return nil
 }
 
-func (d *driverService) GetByID(uid uuid.UUID) (*aggregate.DriverVehicleAggregate, error) {
+func (d *Service) GetByID(uid uuid.UUID) (*aggregate.DriverVehicleAggregate, error) {
 	driverOutput, err := d.repository.GetByID(uid)
 
 	if err != nil {
-		return &aggregate.DriverVehicleAggregate{}, fmt.Errorf("failed to get driver %s", err.Error())
+		return nil, fmt.Errorf("failed to get driver %s", err.Error())
 	}
-	return (*aggregate.DriverVehicleAggregate)(driverOutput), nil
+	if driverOutput == nil {
+		return nil, fmt.Errorf("not found")
+
+	}
+
+	return driverOutput, nil
 }
 
-func (d *driverService) List() ([]driver.Driver, error) {
+func (d *Service) List() ([]driver.Driver, error) {
 	drivers, err := d.repository.GetAll()
 	if err != nil {
 		return []driver.Driver{}, fmt.Errorf("failed to list drivers %s", err.Error())
@@ -77,7 +82,7 @@ func (d *driverService) List() ([]driver.Driver, error) {
 	return drivers, nil
 }
 
-func (d *driverService) Update(uid uuid.UUID, name, email, taxId, driverLicense, dateOfBirth string) error {
+func (d *Service) Update(uid uuid.UUID, name, email, taxId, driverLicense, dateOfBirth string) error {
 	dr := driver.NewDriver(name, email, taxId, driverLicense, dateOfBirth)
 	err := d.repository.Update(uid, dr)
 	if err != nil {
@@ -86,7 +91,7 @@ func (d *driverService) Update(uid uuid.UUID, name, email, taxId, driverLicense,
 	return nil
 }
 
-func (d *driverService) SoftDelete(uid uuid.UUID) error {
+func (d *Service) SoftDelete(uid uuid.UUID) error {
 	err := d.repository.SoftDelete(uid)
 	if err != nil {
 		return fmt.Errorf("failed to delete driver %s", err.Error())
@@ -94,7 +99,7 @@ func (d *driverService) SoftDelete(uid uuid.UUID) error {
 	return nil
 }
 
-func (d *driverService) UnDelete(uid uuid.UUID) error {
+func (d *Service) UnDelete(uid uuid.UUID) error {
 	err := d.repository.UnDelete(uid)
 	if err != nil {
 		return fmt.Errorf("failed to recover driver %s", err.Error())
@@ -102,7 +107,7 @@ func (d *driverService) UnDelete(uid uuid.UUID) error {
 	return nil
 }
 
-func (d *driverService) HardDelete(uid uuid.UUID) error {
+func (d *Service) HardDelete(uid uuid.UUID) error {
 	// unRelate driver before delete
 	err := d.repository.UnRelate(uid)
 	if err != nil {

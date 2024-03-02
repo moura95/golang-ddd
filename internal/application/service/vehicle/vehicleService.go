@@ -1,4 +1,4 @@
-package vehicle
+package vehicleservice
 
 import (
 	"fmt"
@@ -9,21 +9,21 @@ import (
 	"go.uber.org/zap"
 )
 
-type vehicleService struct {
+type Service struct {
 	repository vehicle.IVehicleRepository
 	config     cfg.Config
 	logger     *zap.SugaredLogger
 }
 
-func NewVehicleService(repo vehicle.IVehicleRepository, cfg cfg.Config, log *zap.SugaredLogger) *vehicleService {
-	return &vehicleService{
+func NewVehicleService(repo vehicle.IVehicleRepository, cfg cfg.Config, log *zap.SugaredLogger) *Service {
+	return &Service{
 		repository: repo,
 		config:     cfg,
 		logger:     log,
 	}
 }
 
-func (v *vehicleService) Create(brand, model, licensePlate, color string, yearOfManufacture uint) error {
+func (v *Service) Create(brand, model, licensePlate, color string, yearOfManufacture uint) error {
 	vehi := vehicle.NewVehicle(brand, model, licensePlate, color, yearOfManufacture)
 	err := vehi.Validate()
 
@@ -37,7 +37,7 @@ func (v *vehicleService) Create(brand, model, licensePlate, color string, yearOf
 	return nil
 }
 
-func (v *vehicleService) List() ([]vehicle.Vehicle, error) {
+func (v *Service) List() ([]vehicle.Vehicle, error) {
 	vehicles, err := v.repository.GetAll()
 	if err != nil {
 		return []vehicle.Vehicle{}, fmt.Errorf("failed to get %s", err.Error())
@@ -46,17 +46,21 @@ func (v *vehicleService) List() ([]vehicle.Vehicle, error) {
 	return vehicles, nil
 }
 
-func (v *vehicleService) GetByID(uid uuid.UUID) (vehicle.Vehicle, error) {
+func (v *Service) GetByID(uid uuid.UUID) (*vehicle.Vehicle, error) {
 	ve, err := v.repository.GetByID(uid)
 	if err != nil {
-		return vehicle.Vehicle{}, fmt.Errorf("failed to get %s", err.Error())
+		return nil, fmt.Errorf("failed to get %s", err.Error())
+	}
+	if ve == nil {
+		return nil, fmt.Errorf("failed to get")
 
 	}
-	return *ve, nil
+
+	return ve, nil
 
 }
 
-func (v *vehicleService) Update(uid uuid.UUID, brand, model, licensePlate, color string, yearOfManufacture uint) error {
+func (v *Service) Update(uid uuid.UUID, brand, model, licensePlate, color string, yearOfManufacture uint) error {
 	vehi := vehicle.NewVehicle(brand, model, licensePlate, color, yearOfManufacture)
 
 	err := v.repository.Update(uid, vehi)
@@ -66,14 +70,14 @@ func (v *vehicleService) Update(uid uuid.UUID, brand, model, licensePlate, color
 	return nil
 }
 
-func (v *vehicleService) SoftDelete(uid uuid.UUID) error {
+func (v *Service) SoftDelete(uid uuid.UUID) error {
 	err := v.repository.SoftDelete(uid)
 	if err != nil {
 		return fmt.Errorf("failed to delete")
 	}
 	return nil
 }
-func (v *vehicleService) UnDelete(uid uuid.UUID) error {
+func (v *Service) UnDelete(uid uuid.UUID) error {
 	err := v.repository.UnDelete(uid)
 	if err != nil {
 		return fmt.Errorf("failed to un delete %s", err.Error())
@@ -81,7 +85,7 @@ func (v *vehicleService) UnDelete(uid uuid.UUID) error {
 	return nil
 }
 
-func (v *vehicleService) HardDelete(uid uuid.UUID) error {
+func (v *Service) HardDelete(uid uuid.UUID) error {
 	// unRelate driver before delete
 	err := v.repository.UnRelate(uid)
 	if err != nil {

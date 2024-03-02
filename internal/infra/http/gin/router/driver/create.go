@@ -1,13 +1,10 @@
 package driver_router
 
 import (
-	"database/sql"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/moura95/go-ddd/internal/dtos/driver"
-	"github.com/moura95/go-ddd/internal/dtos/driver_vehicle"
 	"github.com/moura95/go-ddd/internal/infra/util"
 )
 
@@ -30,22 +27,14 @@ func (d *Driver) create(ctx *gin.Context) {
 		return
 	}
 
-	dr := driver.CreateInput{
-		Name:          req.Name,
-		Email:         req.Email,
-		TaxID:         req.TaxID,
-		DriverLicense: req.DriverLicense,
-		DateOfBirth:   sql.NullString{String: req.DateOfBirth},
-	}
-
-	err = d.service.Create(dr)
+	err = d.service.Create(req.Name, req.Email, req.TaxID, req.DriverLicense, req.DateOfBirth)
 
 	if err != nil {
 		d.logger.Errorf("Failed Create Driver %s", err.Error())
 		ctx.JSON(500, util.ErrorResponse("Failed Create Driver"))
 		return
 	}
-	d.logger.Infof("Create Driver succesful %s", dr.Name)
+	d.logger.Infof("Create Driver succesful %s", req.Name)
 
 	ctx.JSON(http.StatusCreated, util.SuccessResponse(req))
 }
@@ -78,12 +67,7 @@ func (d *Driver) subscribe(ctx *gin.Context) {
 		return
 	}
 
-	subs := driver_vehicle.Input{
-		DriverUUID:  vehicleUUID,
-		VehicleUUID: driverUUID,
-	}
-
-	err = d.service.Subscribe(subs)
+	err = d.service.Subscribe(driverUUID, vehicleUUID)
 
 	if err != nil {
 		d.logger.Errorf("Failed Create Relation Driver Vehicle %s", err.Error())
@@ -117,12 +101,8 @@ func (d *Driver) unSubscribe(ctx *gin.Context) {
 		ctx.JSON(400, util.ErrorResponse("Failed Unmarshal"))
 		return
 	}
-	unSubs := driver_vehicle.Input{
-		DriverUUID:  vehicleUUID,
-		VehicleUUID: driverUUID,
-	}
 
-	err = d.service.UnSubscribe(unSubs)
+	err = d.service.UnSubscribe(driverUUID, vehicleUUID)
 	if err != nil {
 		d.logger.Errorf("Failed Unsubscribe %s", err.Error())
 		ctx.JSON(http.StatusInternalServerError, "Failed Unsubscribe")

@@ -68,3 +68,9 @@ func NewServer(cfg cfg.Config, store *sqlx.DB, log *zap.SugaredLogger) *Server {
 func (s *Server) Start(address string) error {
 	return s.router.Run(address)
 }
+
+func RunGinServer(cfg cfg.Config, store *sqlx.DB, log *zap.SugaredLogger) {
+	server := NewServer(cfg, store, log)
+
+	_ = server.Start(cfg.HTTPServerAddress)
+}

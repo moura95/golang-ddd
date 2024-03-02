@@ -11,11 +11,11 @@ type IVehicle interface {
 }
 
 type VehicleRouter struct {
-	service vehicle.IVehicleService
+	service *vehicleservice.Service
 	logger  *zap.SugaredLogger
 }
 
-func NewVehicleRouter(s vehicle.IVehicleService, log *zap.SugaredLogger) *VehicleRouter {
+func NewVehicleRouter(s *vehicleservice.Service, log *zap.SugaredLogger) *VehicleRouter {
 	return &VehicleRouter{
 		service: s,
 		logger:  log,

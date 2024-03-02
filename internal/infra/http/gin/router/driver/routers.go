@@ -11,11 +11,11 @@ type IDriver interface {
 }
 
 type Driver struct {
-	service driver.IDriverService
+	service *driverservice.Service
 	logger  *zap.SugaredLogger
 }
 
-func NewDriverRouter(s driver.IDriverService, log *zap.SugaredLogger) *Driver {
+func NewDriverRouter(s *driverservice.Service, log *zap.SugaredLogger) *Driver {
 	return &Driver{
 		service: s,
 		logger:  log,

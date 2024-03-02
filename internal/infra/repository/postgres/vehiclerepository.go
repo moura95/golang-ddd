@@ -40,6 +40,7 @@ func (r *vehicleRepository) GetAll() ([]vehicle.Vehicle, error) {
 	}
 	for _, dto := range dtoVehicles {
 		v := vehicle.NewVehicle(dto.Brand, dto.Model, dto.LicensePlate, dto.Color, dto.YearOfManufacture)
+		v.Uuid = dto.Uuid
 		vehicles = append(vehicles, *v)
 	}
 
@@ -75,6 +76,7 @@ func (r *vehicleRepository) GetByID(uuid uuid.UUID) (*vehicle.Vehicle, error) {
 		return nil, err
 	}
 	v := vehicle.NewVehicle(dto.Brand, dto.Model, dto.LicensePlate, dto.Color, dto.YearOfManufacture)
+	v.Uuid = dto.Uuid
 
 	return v, nil
 }

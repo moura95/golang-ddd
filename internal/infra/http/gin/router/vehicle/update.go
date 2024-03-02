@@ -3,7 +3,6 @@ package vehicle_router
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	dto "github.com/moura95/go-ddd/internal/dtos/vehicle"
 	"github.com/moura95/go-ddd/internal/infra/util"
 
 	"net/http"
@@ -26,29 +25,20 @@ func (v *VehicleRouter) update(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, util.ErrorResponse(util.ErrorBadRequestUuid.Error()))
 		return
 	}
-	uuidStr, err := uuid.Parse(reqUid.Uuid)
+	uid, err := uuid.Parse(reqUid.Uuid)
 	if err != nil {
 		v.logger.Errorf("Failed Parser uuid %s", err.Error())
 		ctx.JSON(http.StatusBadRequest, util.ErrorResponse(util.ErrorBadRequestUuid.Error()))
 
 	}
 
-	updateVehicle := dto.UpdateInput{
-		Uuid:              uuidStr,
-		Brand:             req.Brand,
-		Model:             req.Model,
-		YearOfManufacture: req.YearOfManufacture,
-		LicensePlate:      req.LicensePlate,
-		Color:             req.Color,
-	}
-
-	err = v.service.Update(updateVehicle)
+	err = v.service.Update(uid, req.Brand, req.Model, req.LicensePlate, req.Color, req.YearOfManufacture)
 	if err != nil {
 		v.logger.Errorf("Failed Unmarshal %s", err.Error())
 		ctx.JSON(http.StatusInternalServerError, util.ErrorResponse("Failed Updated"))
 		return
 	}
-	v.logger.Infof("Updated Successful uuid: %s", updateVehicle.Uuid.String())
+	v.logger.Infof("Updated Successful uuid: %s", reqUid)
 
 	ctx.JSON(http.StatusOK, req)
 

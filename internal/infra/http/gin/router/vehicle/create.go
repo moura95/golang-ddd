@@ -2,7 +2,6 @@ package vehicle_router
 
 import (
 	"github.com/gin-gonic/gin"
-	dto "github.com/moura95/go-ddd/internal/dtos/vehicle"
 	"github.com/moura95/go-ddd/internal/infra/util"
 
 	"net/http"
@@ -26,14 +25,7 @@ func (v *VehicleRouter) create(ctx *gin.Context) {
 		return
 	}
 
-	ve := dto.CreateInput{
-		Brand:             req.Brand,
-		Model:             req.Model,
-		YearOfManufacture: req.YearOfManufacture,
-		LicensePlate:      req.LicensePlate,
-		Color:             req.Color,
-	}
-	err = v.service.Create(ve)
+	err = v.service.Create(req.Brand, req.Model, req.LicensePlate, req.Color, req.YearOfManufacture)
 	if err != nil {
 		v.logger.Errorf("Failed Created %s", err.Error())
 		ctx.JSON(500, util.ErrorResponse(util.ErrorDatabaseCreate.Error()))

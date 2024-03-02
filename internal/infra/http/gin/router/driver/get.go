@@ -74,16 +74,16 @@ func (d *Driver) getId(ctx *gin.Context) {
 		return
 	}
 
-	uuidStr, err := uuid.Parse(req.Uuid)
+	uid, err := uuid.Parse(req.Uuid)
 	if err != nil {
 		d.logger.Errorf("Failed Unmarshal %s", err.Error())
 		ctx.JSON(http.StatusBadRequest, util.ErrorResponse("Bad Request!! Uuid: Invalid"))
 		return
 	}
 
-	driver, err := d.service.GetByID(uuidStr)
-	if driver == nil {
-		d.logger.Errorf("Failed Unmarshal %s", err.Error())
+	driver, err := d.service.GetByID(uid)
+	if err != nil {
+		d.logger.Errorf("Failed Get uuid %s", err.Error())
 		ctx.JSON(http.StatusOK, util.SuccessResponse("Not Found"))
 		return
 	}

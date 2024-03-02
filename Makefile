@@ -16,6 +16,7 @@ down:
 
 up:
 	docker-compose up -d
+	make migrate-up
 
 
 run:

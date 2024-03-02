@@ -70,8 +70,8 @@ func (v *VehicleRouter) getId(ctx *gin.Context) {
 		return
 	}
 	vehicle, err := v.service.GetByID(uuidStr)
-	if vehicle == nil {
-		v.logger.Errorf("Failed Unmarshal %s", err.Error())
+	if err != nil {
+		v.logger.Errorf("Failed to get vehicle %s", err.Error())
 		ctx.JSON(http.StatusOK, util.ErrorResponse("Not Found"))
 		return
 	}

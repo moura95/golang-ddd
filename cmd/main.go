@@ -2,12 +2,13 @@ package main
 
 import (
 	"fmt"
+	"log"
+
 	_ "github.com/lib/pq"
-	"github.com/moura95/go-ddd/cmd/http"
 	"github.com/moura95/go-ddd/internal/infra/cfg"
 	"github.com/moura95/go-ddd/internal/infra/database"
+	"github.com/moura95/go-ddd/internal/infra/http/gin"
 	"go.uber.org/zap"
-	"log"
 )
 
 func main() {
@@ -29,5 +30,5 @@ func main() {
 	sugar := logger.Sugar()
 
 	// Run Gin
-	http.RunGinServer(loadConfig, store, sugar)
+	gin.RunGinServer(loadConfig, store, sugar)
 }
