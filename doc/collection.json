@@ -1,0 +1,386 @@
+{
+	"info": {
+		"_postman_id": "6f65bc9f-176d-4330-b7fd-366f0c3f7509",
+		"name": "Go-DDD",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "9570837",
+		"_collection_link": "https://bold-robot-348630.postman.co/workspace/Midas~5d035be8-0ba7-4934-891c-b374aa9c481a/collection/9570837-6f65bc9f-176d-4330-b7fd-366f0c3f7509?action=share&source=collection_link&creator=9570837"
+	},
+	"item": [
+		{
+			"name": "Driver",
+			"item": [
+				{
+					"name": "List Drivers",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/driver",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"driver"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/driver/:uuid",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"driver",
+								":uuid"
+							],
+							"variable": [
+								{
+									"key": "uuid",
+									"value": "9b0915b2-ac8e-426e-b2f1-f63b1dbc3eb8"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Soft Delete By id",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/driver/:uuid",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"driver",
+								":uuid"
+							],
+							"variable": [
+								{
+									"key": "uuid",
+									"value": "8e1dc62d-b296-4c0d-a273-14ea9b3a9ca7"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Recover Driver",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/driver/:uuid/recover",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"driver",
+								":uuid",
+								"recover"
+							],
+							"variable": [
+								{
+									"key": "uuid",
+									"value": "8e1dc62d-b296-4c0d-a273-14ea9b3a9ca7"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Hard Delete By id",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/driver/:uuid/hard",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"driver",
+								":uuid",
+								"hard"
+							],
+							"variable": [
+								{
+									"key": "uuid",
+									"value": "212c8e55-4678-46ed-a107-a38bb23b4fda"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Driver",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Motorista 1132131\",\n    \"email\": \"motorista67@example.com\",\n    \"tax_id\": \"123456783011\",\n    \"driver_license\": \"ABC12345\",\n    \"date_of_birth\": null\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/driver",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"driver"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Subscribe Driver",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"driver_uuid\": \"9b0915b2-ac8e-426e-b2f1-f63b1dbc3eb8\",\n    \"vehicle_uuid\": \"178e7472-1fe1-4846-96ea-1279840f405a\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/driver/subscribe",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"driver",
+								"subscribe"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UnSubscribe Driver",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "\n{\n    \"driver_uuid\": \"9b0915b2-ac8e-426e-b2f1-f63b1dbc3eb8\",\n    \"vehicle_uuid\": \"178e7472-1fe1-4846-96ea-1279840f405a\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/driver/unsubscribe",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"driver",
+								"unsubscribe"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Driver",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Motorista 1 1312321update\",\n    \"email\": \"motorista12@example.com\",\n    \"tax_id\": \"12345678301112311\",\n    \"driver_license\": \"ABC12345\"\n\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/driver/8e1dc62d-b296-4c0d-a273-14ea9b3a9ca7",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"driver",
+								"8e1dc62d-b296-4c0d-a273-14ea9b3a9ca7"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Vehicle",
+			"item": [
+				{
+					"name": "List Vehicle",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/vehicle",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"vehicle"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/vehicle/:uuid",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"vehicle",
+								":uuid"
+							],
+							"variable": [
+								{
+									"key": "uuid",
+									"value": "a32d97bb-5330-4086-a219-cdab7bbb6cce"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete By id",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/vehicle/:uuid",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"vehicle",
+								":uuid"
+							],
+							"variable": [
+								{
+									"key": "uuid",
+									"value": "a32d97bb-5330-4086-a219-cdab7bbb6cce"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Vehicle",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": " {\n            \"brand\": \"Scania\",\n            \"model\": \"R500\",\n            \"year_of_manufacture\": 2020,\n            \"license_plate\": \"ABC1a23\",\n            \"color\": \"Blue\",\n            \"deleted_at\": \"\",\n            \"created_at\": \"2024-02-01T23:15:50.155678Z\",\n            \"updated_at\": \"2024-02-01T23:15:50.155678Z\"\n        }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/vehicle",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"vehicle"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Vehicle",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"brand\": \"Scania update\",\n    \"model\": \"R500\",\n    \"year_of_manufacture\": 2020,\n    \"license_plate\": \"ABC1234\",\n    \"color\": \"Blue\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/vehicle/a32d97bb-5330-4086-a219-cdab7bbb6cce",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"vehicle",
+								"a32d97bb-5330-4086-a219-cdab7bbb6cce"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Recover Vehicle",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/vehicle/:uuid/recover",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"vehicle",
+								":uuid",
+								"recover"
+							],
+							"variable": [
+								{
+									"key": "uuid",
+									"value": "a32d97bb-5330-4086-a219-cdab7bbb6cce"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

@@ -1,0 +1,203 @@
+package postgres
+
+import (
+	"database/sql"
+	"errors"
+	"time"
+
+	"github.com/google/uuid"
+	"github.com/jmoiron/sqlx"
+	"github.com/moura95/go-ddd/internal/aggregate"
+	"github.com/moura95/go-ddd/internal/domain/driver"
+	"github.com/moura95/go-ddd/internal/domain/vehicle"
+	"go.uber.org/zap"
+)
+
+type driverRepository struct {
+	db     *sqlx.DB
+	logger *zap.SugaredLogger
+}
+
+type DtoDriverVehicle struct {
+	DriverUUID    uuid.UUID      `database:"driver_uuid"`
+	DriverName    string         `database:"name"`
+	DriverEmail   string         `database:"email"`
+	DriverTaxID   string         `database:"tax_id"`
+	DriverLicense string         `database:"driver_license"`
+	DriverDOB     sql.NullString `database:"date_of_birth"`
+	VehicleUUID   uuid.UUID      `database:"uuid"`
+	VehicleBrand  string         `database:"brand"`
+	VehicleModel  string         `database:"model"`
+	VehicleYear   uint           `database:"year_of_manufacture"`
+	VehicleColor  string         `database:"color"`
+}
+
+type DtoDriverPostgres struct {
+	Uuid          uuid.UUID      `db:"uuid"`
+	Name          string         `db:"name"`
+	Email         string         `db:"email"`
+	TaxID         string         `db:"tax_id"`
+	DriverLicense string         `db:"driver_license"`
+	DateOfBirth   sql.NullString `db:"date_of_birth"`
+	DeletedAt     sql.NullString `db:"deleted_at"`
+	CreatedAt     time.Time      `db:"created_at"`
+	UpdatedAt     time.Time      `db:"update_at"`
+}
+
+func NewDriverRepository(db *sqlx.DB, log *zap.SugaredLogger) driver.IDriverRepository {
+	return &driverRepository{db: db, logger: log}
+}
+
+func (r *driverRepository) GetAll() ([]driver.Driver, error) {
+	var drivers []driver.Driver
+	var dto []DtoDriverPostgres
+	query := "SELECT * FROM drivers WHERE deleted_at is null"
+	if err := r.db.Select(&dto, query); err != nil {
+		return []driver.Driver{}, err
+	}
+	for _, d := range dto {
+		instanceDriver := driver.NewDriver(d.Name, d.Email, d.TaxID, d.DriverLicense, d.DateOfBirth.String)
+		drivers = append(drivers, *instanceDriver)
+	}
+	return drivers, nil
+}
+
+func (r *driverRepository) Create(dr driver.Driver) error {
+	query := `
+        INSERT INTO drivers (name, email, tax_id, driver_license, date_of_birth)
+        VALUES ($1, $2, $3, $4, $5)
+    `
+	args := []interface{}{
+		dr.Name,
+		dr.Email,
+		dr.TaxID,
+		dr.DriverLicense,
+		dr.DateOfBirth,
+	}
+	_, err := r.db.Exec(query, args...)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *driverRepository) Subscribe(driverVehicle aggregate.DriverVehicle) error {
+	query := `
+        INSERT INTO drivers_vehicles (driver_uuid, vehicle_uuid)
+        VALUES ($1, $2)
+    `
+	args := []interface{}{
+		driverVehicle.VehicleUUID,
+		driverVehicle.DriverUUID,
+	}
+	_, err := r.db.Exec(query, args...)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *driverRepository) UnSubscribe(driverVehicle aggregate.DriverVehicle) error {
+	query := "DELETE FROM drivers_vehicles WHERE driver_uuid =$1 AND vehicle_uuid =$2"
+	args := []interface{}{
+		driverVehicle.VehicleUUID,
+		driverVehicle.DriverUUID,
+	}
+	_, err := r.db.Exec(query, args...)
+	if err != nil {
+		return err
+	}
+	return err
+}
+
+func (r *driverRepository) GetByID(uid uuid.UUID) (*aggregate.DriverVehicleAggregate, error) {
+	var dto []DtoDriverVehicle
+
+	query := `
+		SELECT d.uuid, d.name, d.email, d.tax_id, d.driver_license, d.date_of_birth,
+		       v.uuid, v.brand , v.model,
+		       v.year_of_manufacture , v.color
+		FROM drivers AS d
+		LEFT JOIN drivers_vehicles AS dv ON d.uuid = dv.driver_uuid
+		LEFT JOIN vehicles AS v ON v.uuid = dv.vehicle_uuid
+		WHERE d.uuid = $1
+	`
+
+	err := r.db.Select(&dto, query, uid)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	d := &aggregate.DriverVehicleAggregate{
+		Uuid:          dto[0].DriverUUID,
+		Name:          dto[0].DriverName,
+		Email:         dto[0].DriverEmail,
+		TaxID:         dto[0].DriverTaxID,
+		DriverLicense: dto[0].DriverLicense,
+		DateOfBirth:   dto[0].DriverDOB,
+		Vehicles:      make([]vehicle.Vehicle, 0, len(dto)),
+	}
+
+	for _, res := range dto {
+		v := vehicle.Vehicle{
+			Uuid:              res.VehicleUUID,
+			Brand:             res.VehicleBrand,
+			Model:             res.VehicleModel,
+			YearOfManufacture: res.VehicleYear,
+			Color:             res.VehicleColor,
+		}
+		d.Vehicles = append(d.Vehicles, v)
+	}
+
+	return d, nil
+}
+
+func (r *driverRepository) Update(uuid uuid.UUID, dr *driver.Driver) error {
+	query := `
+        UPDATE drivers 
+        SET name=$2, tax_id=$3, driver_license=$4, date_of_birth=$5, update_at=$6
+    	WHERE uuid= $1`
+
+	args := []interface{}{
+		uuid,
+		dr.Name,
+		dr.TaxID,
+		dr.DriverLicense,
+		dr.DateOfBirth,
+		time.Now(),
+	}
+	_, err := r.db.Exec(query, args...)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *driverRepository) HardDelete(uuid uuid.UUID) error {
+	query := "DELETE FROM drivers WHERE uuid = :UUID"
+	_, err := r.db.NamedExec(query, map[string]interface{}{"UUID": uuid})
+	return err
+}
+
+func (r *driverRepository) SoftDelete(uuid uuid.UUID) error {
+	query := "UPDATE drivers SET deleted_at=now() WHERE uuid = :UUID"
+	_, err := r.db.NamedExec(query, map[string]interface{}{"UUID": uuid})
+	return err
+}
+
+func (r *driverRepository) UnDelete(uuid uuid.UUID) error {
+	query := "UPDATE drivers SET deleted_at=null WHERE uuid = :UUID"
+	_, err := r.db.NamedExec(query, map[string]interface{}{"UUID": uuid})
+	return err
+}
+
+func (r *driverRepository) UnRelate(driverUUID uuid.UUID) error {
+	query := "DELETE FROM drivers_vehicles WHERE driver_uuid = :DriverUUID"
+	_, err := r.db.NamedExec(query, map[string]interface{}{"DriverUUID": driverUUID})
+	return err
+}

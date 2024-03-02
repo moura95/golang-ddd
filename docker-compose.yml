@@ -1,0 +1,54 @@
+services:
+  psql:
+    image: postgres:latest
+    container_name: psql
+    user: postgres
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_ROOT_PASSWORD=postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - database:/var/lib/postgresql/data
+
+  migrate:
+    image: migrate/migrate
+    volumes:
+      - type: bind
+        source: ./internal/infra/database
+        target: /database
+    command: [ "-path", "/internal/infra/database/migration", "-database",  "postgres://postgres:postgres@psql:5432/?sslmode=disable", "up" ]
+    links:
+      - psql
+    depends_on:
+      psql:
+        condition: service_healthy
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_SOURCE=postgres://postgres:postgres@psql:5432/?sslmode=disable
+    depends_on:
+      psql:
+        condition: service_healthy
+    entrypoint:
+      [
+        "main"
+      ]
+    command: ["main"]
+
+volumes:
+  database:
+
+
