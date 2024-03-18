@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/moura95/go-ddd/internal/domain/vehicle"
-	"github.com/moura95/go-ddd/internal/infra/repository/memory"
+	"github.com/moura95/go-ddd/internal/infra/database/memory"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -24,7 +24,7 @@ run:
 
 start:
 	make up
-	sleep 10
+	sleep 5
 	make migrate-up
 	go run cmd/main.go
 

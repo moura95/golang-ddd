@@ -4,11 +4,11 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/moura95/go-ddd/internal/application/service/driver"
-	vehicleservice "github.com/moura95/go-ddd/internal/application/service/vehicle"
-	driverrouter "github.com/moura95/go-ddd/internal/infra/http/gin/router/driver"
-	vehiclerouter "github.com/moura95/go-ddd/internal/infra/http/gin/router/vehicle"
-	driverpostgres "github.com/moura95/go-ddd/internal/infra/repository/postgres"
+	"github.com/moura95/go-ddd/internal/application/services/driver"
+	vehicleservice "github.com/moura95/go-ddd/internal/application/services/vehicle"
+	driverpostgres "github.com/moura95/go-ddd/internal/infra/database/postgres"
+	driverrouter "github.com/moura95/go-ddd/internal/infra/http/gin/controllers/driver"
+	vehiclerouter "github.com/moura95/go-ddd/internal/infra/http/gin/controllers/vehicle"
 	"go.uber.org/zap"
 )
 

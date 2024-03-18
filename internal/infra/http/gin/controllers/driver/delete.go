@@ -1,4 +1,4 @@
-package driver_router
+package driver_controller
 
 import (
 	"github.com/gin-gonic/gin"

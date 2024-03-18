@@ -1,8 +1,8 @@
-package driver_router
+package driver_controller
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/moura95/go-ddd/internal/application/service/driver"
+	"github.com/moura95/go-ddd/internal/application/services/driver"
 	"go.uber.org/zap"
 )
 
