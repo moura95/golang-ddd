@@ -18,7 +18,7 @@ type driverRepository struct {
 	logger *zap.SugaredLogger
 }
 
-type DtoDriverVehicle struct {
+type DriverVehiclePostgres struct {
 	DriverUUID    uuid.UUID      `db:"driver_uuid"`
 	DriverName    string         `db:"name"`
 	DriverEmail   string         `db:"email"`
@@ -34,7 +34,7 @@ type DtoDriverVehicle struct {
 	UpdatedAt     time.Time      `db:"update_at"`
 }
 
-type DtoDriverPostgres struct {
+type DriverPostgres struct {
 	Uuid          uuid.UUID      `db:"uuid"`
 	Name          string         `db:"name"`
 	Email         string         `db:"email"`
@@ -52,7 +52,7 @@ func NewDriverRepository(db *sqlx.DB, log *zap.SugaredLogger) driver.IDriverRepo
 
 func (r *driverRepository) GetAll() ([]driver.Driver, error) {
 	var drivers []driver.Driver
-	var dto []DtoDriverPostgres
+	var dto []DriverPostgres
 	query := "SELECT * FROM drivers WHERE deleted_at is null"
 	if err := r.db.Select(&dto, query); err != nil {
 		return []driver.Driver{}, err
@@ -116,7 +116,7 @@ func (r *driverRepository) UnSubscribe(driverVehicle aggregate.DriverVehicle) er
 }
 
 func (r *driverRepository) GetByID(uid uuid.UUID) (*aggregate.DriverVehicleAggregate, error) {
-	var dto []DtoDriverVehicle
+	var dto []DriverVehiclePostgres
 
 	query := `
 		SELECT d.uuid driver_uuid, d.name, d.email, d.tax_id, d.driver_license, d.date_of_birth,
@@ -130,7 +130,7 @@ func (r *driverRepository) GetByID(uid uuid.UUID) (*aggregate.DriverVehicleAggre
 
 	err := r.db.Select(&dto, query, uid)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) || err.Error() == "missing destination name uuid in *[]postgres.DtoDriverVehicle" {
+		if errors.Is(err, sql.ErrNoRows) || err.Error() == "missing destination name uuid in *[]postgres.DriverVehicleDb" {
 			return nil, nil
 		}
 		return nil, err

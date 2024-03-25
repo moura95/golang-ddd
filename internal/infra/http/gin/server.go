@@ -29,26 +29,21 @@ func NewServer(cfg cfg.Config, store *sqlx.DB, log *zap.SugaredLogger) *Server {
 	}
 	var router *gin.Engine
 
-	if server.config.GinMode == "release" {
-		router = gin.Default()
-		router.Use(gzip.Gzip(gzip.DefaultCompression))
-		router.Use(ratelimiter.GinMemRatelimiter(ratelimiter.GinRatelimiterConfig{
-			LimitKey: func(c *gin.Context) string {
-				return c.ClientIP()
-			},
-			LimitedHandler: func(c *gin.Context) {
-				c.JSON(200, "too many requests!!!")
-				c.Abort()
-				return
-			},
-			TokenBucketConfig: func(*gin.Context) (time.Duration, int) {
-				return time.Second * 60, 4000
-			},
-		}))
-
-	} else {
-		router = gin.Default()
-	}
+	router = gin.Default()
+	router.Use(gzip.Gzip(gzip.DefaultCompression))
+	router.Use(ratelimiter.GinMemRatelimiter(ratelimiter.GinRatelimiterConfig{
+		LimitKey: func(c *gin.Context) string {
+			return c.ClientIP()
+		},
+		LimitedHandler: func(c *gin.Context) {
+			c.JSON(200, "too many requests!!!")
+			c.Abort()
+			return
+		},
+		TokenBucketConfig: func(*gin.Context) (time.Duration, int) {
+			return time.Second * 60, 4000
+		},
+	}))
 
 	corsConfig := cors.Config{
 		AllowAllOrigins:  true,

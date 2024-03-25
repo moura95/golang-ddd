@@ -63,6 +63,14 @@ func (v *VehicleRouter) getId(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, util.ErrorResponse("Bad Request!! Uuid: Invalid"))
 		return
 	}
+
+	err = uuid.Validate(req.Uuid)
+
+	if err != nil {
+		v.logger.Errorf("Uuid Invalid %s", err.Error())
+		ctx.JSON(http.StatusBadRequest, util.ErrorResponse("Bad Request!! Uuid: Invalid"))
+	}
+
 	uuidStr, err := uuid.Parse(req.Uuid)
 	if err != nil {
 		v.logger.Errorf("Failed Unmarshal %s", err.Error())
