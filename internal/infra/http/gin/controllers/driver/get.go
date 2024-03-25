@@ -27,12 +27,12 @@ type driverResponse struct {
 }
 
 type vehicleResponse struct {
-	Uuid              uuid.UUID `database:"uuid"`
-	Brand             string    `database:"brand"`
-	Model             string    `database:"model"`
-	YearOfManufacture uint      `database:"year_of_manufacture"`
-	LicensePlate      string    `database:"license_plate"`
-	Color             string    `database:"color"`
+	Uuid              uuid.UUID `repository:"uuid"`
+	Brand             string    `repository:"brand"`
+	Model             string    `repository:"model"`
+	YearOfManufacture uint      `repository:"year_of_manufacture"`
+	LicensePlate      string    `repository:"license_plate"`
+	Color             string    `repository:"color"`
 }
 
 func (d *Driver) list(ctx *gin.Context) {

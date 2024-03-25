@@ -16,15 +16,15 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - database:/var/lib/postgresql/data
+      - repository:/var/lib/postgresql/data
 
   migrate:
     image: migrate/migrate
     volumes:
       - type: bind
-        source: ./internal/infra/database
-        target: /database
-    command: [ "-path", "/internal/infra/database/migration", "-database",  "postgres://postgres:postgres@psql:5432/?sslmode=disable", "up" ]
+        source: ./internal/infra/repository
+        target: /repository
+    command: [ "-path", "/internal/infra/repository/migration", "-repository",  "postgres://postgres:postgres@psql:5432/?sslmode=disable", "up" ]
     links:
       - psql
     depends_on:

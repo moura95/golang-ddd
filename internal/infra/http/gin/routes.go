@@ -6,9 +6,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/moura95/go-ddd/internal/application/services/driver"
 	vehicleservice "github.com/moura95/go-ddd/internal/application/services/vehicle"
-	driverpostgres "github.com/moura95/go-ddd/internal/infra/database/postgres"
 	driverrouter "github.com/moura95/go-ddd/internal/infra/http/gin/controllers/driver"
 	vehiclerouter "github.com/moura95/go-ddd/internal/infra/http/gin/controllers/vehicle"
+	driverpostgres "github.com/moura95/go-ddd/internal/infra/repository/postgres"
 	"go.uber.org/zap"
 )
 
