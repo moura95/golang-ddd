@@ -15,7 +15,7 @@ type vehicleRepository struct {
 	db     *sqlx.DB
 	logger *zap.SugaredLogger
 }
-type DtoVehicle struct {
+type VehicleModel struct {
 	Uuid              uuid.UUID      `db:"uuid"`
 	Brand             string         `db:"brand"`
 	Model             string         `db:"model"`
@@ -33,14 +33,14 @@ func NewVehicleRepository(db *sqlx.DB, log *zap.SugaredLogger) vehicle.IVehicleR
 
 func (r *vehicleRepository) GetAll() ([]vehicle.Vehicle, error) {
 	var vehicles []vehicle.Vehicle
-	var dtoVehicles []DtoVehicle
+	var modelVehicles []VehicleModel
 	query := "SELECT * FROM vehicles WHERE deleted_at is null"
-	if err := r.db.Select(&dtoVehicles, query); err != nil {
+	if err := r.db.Select(&modelVehicles, query); err != nil {
 		return nil, err
 	}
-	for _, dto := range dtoVehicles {
-		v := vehicle.NewVehicle(dto.Brand, dto.Model, dto.LicensePlate, dto.Color, dto.YearOfManufacture)
-		v.Uuid = dto.Uuid
+	for _, model := range modelVehicles {
+		v := vehicle.NewVehicle(model.Brand, model.Model, model.LicensePlate, model.Color, model.YearOfManufacture)
+		v.Uuid = model.Uuid
 		vehicles = append(vehicles, *v)
 	}
 
@@ -67,16 +67,16 @@ func (r *vehicleRepository) Create(ve vehicle.Vehicle) error {
 	return nil
 }
 func (r *vehicleRepository) GetByID(uuid uuid.UUID) (*vehicle.Vehicle, error) {
-	var dto DtoVehicle
-	err := r.db.Get(&dto, "SELECT * FROM vehicles WHERE uuid = $1", uuid)
+	var model VehicleModel
+	err := r.db.Get(&model, "SELECT * FROM vehicles WHERE uuid = $1", uuid)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil // Driver not found
 		}
 		return nil, err
 	}
-	v := vehicle.NewVehicle(dto.Brand, dto.Model, dto.LicensePlate, dto.Color, dto.YearOfManufacture)
-	v.Uuid = dto.Uuid
+	v := vehicle.NewVehicle(model.Brand, model.Model, model.LicensePlate, model.Color, model.YearOfManufacture)
+	v.Uuid = model.Uuid
 
 	return v, nil
 }

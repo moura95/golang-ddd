@@ -18,7 +18,7 @@ type driverRepository struct {
 	logger *zap.SugaredLogger
 }
 
-type DriverVehiclePostgres struct {
+type DriverVehicleModel struct {
 	DriverUUID    uuid.UUID      `db:"driver_uuid"`
 	DriverName    string         `db:"name"`
 	DriverEmail   string         `db:"email"`
@@ -34,7 +34,7 @@ type DriverVehiclePostgres struct {
 	UpdatedAt     time.Time      `db:"update_at"`
 }
 
-type DriverPostgres struct {
+type DriverModel struct {
 	Uuid          uuid.UUID      `db:"uuid"`
 	Name          string         `db:"name"`
 	Email         string         `db:"email"`
@@ -52,12 +52,12 @@ func NewDriverRepository(db *sqlx.DB, log *zap.SugaredLogger) driver.IDriverRepo
 
 func (r *driverRepository) GetAll() ([]driver.Driver, error) {
 	var drivers []driver.Driver
-	var dto []DriverPostgres
+	var model []DriverModel
 	query := "SELECT * FROM drivers WHERE deleted_at is null"
-	if err := r.db.Select(&dto, query); err != nil {
+	if err := r.db.Select(&model, query); err != nil {
 		return []driver.Driver{}, err
 	}
-	for _, d := range dto {
+	for _, d := range model {
 		instanceDriver := driver.NewDriver(d.Name, d.Email, d.TaxID, d.DriverLicense, d.DateOfBirth.String)
 		instanceDriver.Uuid = d.Uuid
 		drivers = append(drivers, *instanceDriver)
@@ -116,7 +116,7 @@ func (r *driverRepository) UnSubscribe(driverVehicle aggregate.DriverVehicle) er
 }
 
 func (r *driverRepository) GetByID(uid uuid.UUID) (*aggregate.DriverVehicleAggregate, error) {
-	var dto []DriverVehiclePostgres
+	var model []DriverVehicleModel
 
 	query := `
 		SELECT d.uuid driver_uuid, d.name, d.email, d.tax_id, d.driver_license, d.date_of_birth,
@@ -128,28 +128,28 @@ func (r *driverRepository) GetByID(uid uuid.UUID) (*aggregate.DriverVehicleAggre
 		WHERE d.uuid = $1
 	`
 
-	err := r.db.Select(&dto, query, uid)
+	err := r.db.Select(&model, query, uid)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) || err.Error() == "missing destination name uuid in *[]postgres.DriverVehicleDb" {
 			return nil, nil
 		}
 		return nil, err
 	}
-	if dto == nil {
+	if model == nil {
 		return nil, nil
 	}
 
 	d := &aggregate.DriverVehicleAggregate{
-		Uuid:          dto[0].DriverUUID,
-		Name:          dto[0].DriverName,
-		Email:         dto[0].DriverEmail,
-		TaxID:         dto[0].DriverTaxID,
-		DriverLicense: dto[0].DriverLicense,
-		DateOfBirth:   dto[0].DriverDOB,
-		Vehicles:      make([]vehicle.Vehicle, 0, len(dto)),
+		Uuid:          model[0].DriverUUID,
+		Name:          model[0].DriverName,
+		Email:         model[0].DriverEmail,
+		TaxID:         model[0].DriverTaxID,
+		DriverLicense: model[0].DriverLicense,
+		DateOfBirth:   model[0].DriverDOB,
+		Vehicles:      make([]vehicle.Vehicle, 0, len(model)),
 	}
 
-	for _, res := range dto {
+	for _, res := range model {
 		v := vehicle.Vehicle{
 			Uuid:              res.VehicleUUID,
 			Brand:             res.VehicleBrand,
